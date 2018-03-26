@@ -37,7 +37,7 @@ extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
     }
 
     func onCardViewDoubleTapped(tappedView: CardView) {
-        moveToSuitableLocation(tappedView, toLocation: nil, shouldTurnOverFaceTo: .down)
+        moveToSuitableLocation(tappedView, toLocation: nil, shouldTurnOverFaceTo: .up)
     }
 
     func onSpareViewTapped(tappedView: CardView) {
