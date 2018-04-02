@@ -32,13 +32,11 @@ class Card {
 // 카드를 비교할 경우, 카드의 숫자를 비교. (Shape과 Number의 캡슐화를 위함.)
 extension Card: Equatable, Comparable {
     static func == (lhs: Card, rhs: Card) -> Bool {
-        guard lhs.number == rhs.number else { return false }
-        return true
+        return (lhs.number == rhs.number) && (lhs.shape == rhs.shape)
     }
 
     static func < (lhs: Card, rhs: Card) -> Bool {
-        guard lhs.number < rhs.number else { return false }
-        return true
+        return lhs.number < rhs.number
     }
 
 }
