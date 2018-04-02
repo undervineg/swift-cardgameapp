@@ -19,7 +19,7 @@ class TableauView: UIView, CanLayCards, CanFindGameView {
     init(frame: CGRect, index: Int, config: ViewConfig) {
         emptyView = EmptyView(frame: CGRect(origin: .zero, size: config.cardSize))
         self.index = index
-        self.config = ViewConfig(on: UIView())
+        self.config = config
         self.verticalSpacing = config.cardSize.height*0.3
         super.init(frame: frame)
         addSubview(emptyView)
@@ -50,12 +50,16 @@ class TableauView: UIView, CanLayCards, CanFindGameView {
         laidCards = []
     }
 
-    func nextCardPosition() -> CGPoint? {
-        var basePosition: CGPoint?
+    func nextCardPosition() -> CGPoint {
+        var basePosition = CGPoint()
         handleCertainView(from: self) { gameView in
             basePosition = convert(self.frame.origin, to: gameView)
         }
-        return CGPoint(x: basePosition!.x/2, y: basePosition!.y+CGFloat(laidCards.count)*verticalSpacing)
+        return CGPoint(x: basePosition.x/2, y: basePosition.y+CGFloat(laidCards.count)*verticalSpacing)
+    }
+
+    func nextCardRect() -> CGRect {
+        return CGRect(origin: nextCardPosition(), size: config.cardSize)
     }
 
     func below(cardView: CardView) -> [CardView]? {
