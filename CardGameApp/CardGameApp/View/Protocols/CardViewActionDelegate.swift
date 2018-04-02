@@ -10,5 +10,14 @@ import UIKit
 
 protocol CardViewActionDelegate: class {
     func onSpareViewTapped(tappedView: CardView)
+
     func onCardViewDoubleTapped(tappedView: CardView)
+
+    func onCardViewDragBegan(gesture: UIPanGestureRecognizer)
+
+    func onCardViewDragChanged(gesture: UIPanGestureRecognizer)
+
+    func onCardViewDragEnded(gesture: UIPanGestureRecognizer)
+
+    func onCardViewDragCancelled(gesture: UIPanGestureRecognizer)
 }
