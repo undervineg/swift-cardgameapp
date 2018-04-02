@@ -11,9 +11,16 @@ import UIKit
 class GameView: UIView {
     weak var delegate: CardViewActionDelegate?
     weak var refreshDelegate: RefreshActionDelegate?
+    weak var checkDelegate: GameResultCheckingDelegate?
     private var game: GameViewModel!
     private var config: ViewConfig!
-    private(set) var foundationViewContainer = FoundationViewContainer(frame: .zero)
+    private(set) var foundationViewContainer = FoundationViewContainer(frame: .zero) {
+        didSet {
+            (0..<config.foundationCount).forEach {
+                foundationViewContainer.at($0).checkDelegate = self
+            }
+        }
+    }
     private(set) var wasteView = WasteView(frame: .zero)
     private(set) var spareView = SpareView(frame: .zero) {
         didSet {
@@ -56,17 +63,45 @@ class GameView: UIView {
         setupCards()
     }
 
-    func move(_ movableCard: MovableCardView) {
-        addSubview(movableCard)
-        let newLocation = movableCard.endLocation
-        let newPosition: CGPoint?
+    func dropLocation(of cardView: CardView) -> Location? {
+        // spare, waste에는 놓을 수 없다
+        for (index, foundation) in foundationViewContainer.enumerated() {
+            if cardView.frame.intersects(foundation.frame) {
+                return Location.foundation(index)
+            }
+        }
+        for (index, tableau) in tableauViewContainer.enumerated() {
+            if cardView.frame.intersects(tableau.nextCardRect()) {
+                return Location.tableau(index)
+            }
+        }
+        return nil
+    }
+
+    func getCardViewsBelowIfNeeded(below cardView: CardView) -> [CardView]? {
+        guard let fromLocation = cardView.viewModel?.location.value else { return nil }
+        var cardViewsBelow: [CardView]?
+        if case let Location.tableau(index) = fromLocation {
+            let tableauView = tableauViewContainer.at(index)
+            cardViewsBelow = tableauView.below(cardView: cardView)
+        }
+        return cardViewsBelow
+    }
+
+    func position(of newLocation: Location) -> CGPoint {
+        let newPosition: CGPoint
         switch newLocation {
         case .spare: newPosition = spareView.nextCardPosition()
         case .waste: newPosition = wasteView.nextCardPosition()
         case .foundation(let index): newPosition = foundationViewContainer.at(index).nextCardPosition()
         case .tableau(let index): newPosition = tableauViewContainer.at(index).nextCardPosition()
         }
-        movableCard.animateToMove(to: newPosition)
+        return newPosition
+    }
+
+    func move(_ movableCardView: AnimatableCardView) {
+        guard let endLocation = movableCardView.endLocation else { return }
+        movableCardView.animateToMove(to: position(of: endLocation))
     }
 
     // MARK: - Private
@@ -116,10 +151,14 @@ class GameView: UIView {
 
 }
 
-extension GameView: RefreshActionDelegate {
+extension GameView: RefreshActionDelegate, GameResultCheckingDelegate {
     // SpareView에서 올라온 델리게이트 액션을 받아 GameViewController에 넘김
     func onRefreshButtonTapped() {
         refreshDelegate?.onRefreshButtonTapped()
+    }
+
+    func checkWhetherGameDone() {
+        checkDelegate?.checkWhetherGameDone()
     }
 
 }
