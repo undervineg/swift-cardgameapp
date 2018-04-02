@@ -16,4 +16,9 @@ class Foundation: CardStack {
         return (card.number.rawValue == peek()!.number.rawValue+1) && (card.shape == peek()!.shape)
     }
 
+    func isCompleted() -> Bool {
+        guard let lastCard = cards.element else { return false }
+        return (lastCard.number == .king)
+    }
+
 }
