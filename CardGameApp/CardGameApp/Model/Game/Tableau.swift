@@ -14,11 +14,6 @@ class Tableau: CardStack {
         self.push(cards: cards)
     }
 
-    func canPush(_ cards: [Card]) -> Bool {
-        guard let firstCard = cards.first else { return false }
-        return canPush(below: firstCard)
-    }
-
     func canPush(below card: Card) -> Bool {
         // 빈 경우, K만 받음.
         if isEmpty {
@@ -57,7 +52,8 @@ class Tableau: CardStack {
     }
 
     func isBottom(_ card: Card) -> Bool {
-        return peek() == card
+        guard let lastCard = peek() else { return false }
+        return lastCard == card
     }
 
 }
