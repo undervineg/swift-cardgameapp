@@ -13,5 +13,5 @@ protocol CanLayCards {
 
     func removeLastCard()
 
-    func nextCardPosition() -> CGPoint?
+    func nextCardPosition() -> CGPoint
 }
