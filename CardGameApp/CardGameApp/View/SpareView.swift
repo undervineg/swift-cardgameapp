@@ -44,7 +44,7 @@ class SpareView: UIView, CanLayCards {
         }
     }
 
-    func nextCardPosition() -> CGPoint? {
+    func nextCardPosition() -> CGPoint {
         return self.frame.origin
     }
 

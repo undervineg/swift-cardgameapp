@@ -28,7 +28,7 @@ class WasteView: UIView, Sequence, CanLayCards {
         super.init(coder: aDecoder)
     }
 
-    func nextCardPosition() -> CGPoint? {
+    func nextCardPosition() -> CGPoint {
         return self.frame.origin
     }
 
