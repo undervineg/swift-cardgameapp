@@ -11,7 +11,12 @@ import UIKit
 class FoundationView: UIView, CanLayCards, CanFindGameView {
     private var index: Int
     private let emptyView: EmptyView
-    private var laidCards: [CardView] = []
+    weak var checkDelegate: GameResultCheckingDelegate?
+    private var laidCards: [CardView] = [] {
+        didSet {
+            checkDelegate?.checkWhetherGameDone()
+        }
+    }
 
     convenience init(frame: CGRect, index: Int) {
         self.init(frame: frame)
@@ -44,11 +49,11 @@ class FoundationView: UIView, CanLayCards, CanFindGameView {
         laidCards = []
     }
 
-    func nextCardPosition() -> CGPoint? {
-        var basePosition: CGPoint?
+    func nextCardPosition() -> CGPoint {
+        var basePosition = CGPoint()
         handleCertainView(from: self) { gameView in
             basePosition = convert(self.frame.origin, to: gameView)
         }
-        return CGPoint(x: basePosition!.x/2, y: basePosition!.y)
+        return CGPoint(x: basePosition.x/2, y: basePosition.y)
     }
 }
