@@ -14,6 +14,7 @@ class GameViewController: UIViewController {
         didSet {
             gameView.delegate = self
             gameView.refreshDelegate = self
+            gameView.checkDelegate = self
             view.addSubview(gameView)
         }
     }
@@ -26,9 +27,49 @@ class GameViewController: UIViewController {
         gameViewModel.initialize()
         gameView.initialize()
     }
+
+    var draggableCard: DraggableCard?
+
 }
 
 extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
+    func onCardViewDragBegan(gesture: UIPanGestureRecognizer) {
+        guard let tappedView = gesture.view as? CardView else { return }
+        self.draggableCard = DraggableCard(cardView: tappedView)
+        if let belowCards = gameView.getCardViewsBelowIfNeeded(below: tappedView) {
+            draggableCard?.setCardViewsBelow(belowCards)
+        }
+        tappedView.bringToFront()
+        draggableCard?.cardViewsBelow?.forEach {
+            $0.bringToFront()
+        }
+    }
+
+    func onCardViewDragChanged(gesture: UIPanGestureRecognizer) {
+        draggableCard?.translateCardViews(about: gesture.translation(in: gameView))
+        gesture.setTranslation(.zero, in: gameView)
+    }
+
+    func onCardViewDragEnded(gesture: UIPanGestureRecognizer) {
+        guard let tappedView = gesture.view as? CardView,
+            let cardViewModel = tappedView.viewModel,
+            let dropLocation = gameView.dropLocation(of: tappedView),
+            gameViewModel.canMove(cardViewModel, to: dropLocation) else {
+                onCardViewDragCancelled(gesture: gesture)
+                return
+        }
+
+        let dropPosition = gameView.position(of: dropLocation)
+        draggableCard?.drop(at: dropPosition)
+
+        updateSuperview(of: tappedView, and: draggableCard?.cardViewsBelow, to: dropLocation)
+        updateModel(of: tappedView, and: draggableCard?.cardViewsBelow, to: dropLocation)
+    }
+
+    func onCardViewDragCancelled(gesture: UIPanGestureRecognizer) {
+        draggableCard?.reset()
+    }
+
     override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
         if motion == .motionShake {
             gameViewModel.initialize()
@@ -37,49 +78,41 @@ extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
     }
 
     func onCardViewDoubleTapped(tappedView: CardView) {
-        moveToSuitableLocation(tappedView, toLocation: nil, shouldTurnOverFaceTo: .up)
+        guard let cardViewModel = tappedView.viewModel,
+            let toLocation = gameViewModel.suitableLocation(for: cardViewModel) else { return }
+        move(tappedView, to: toLocation, with: .up, animated: true)
     }
 
     func onSpareViewTapped(tappedView: CardView) {
-        moveToSuitableLocation(tappedView, toLocation: nil, shouldTurnOverFaceTo: .up)
+        guard let cardViewModel = tappedView.viewModel,
+            let toLocation = gameViewModel.suitableLocation(for: cardViewModel) else { return }
+        move(tappedView, to: toLocation, with: .up, animated: true)
     }
 
     func onRefreshButtonTapped() {
         for card in gameView.wasteView.reversed() {
-            moveToSuitableLocation(card, toLocation: .spare, shouldTurnOverFaceTo: .down)
+            move(card, to: .spare, with: .down, animated: true)
         }
     }
 
     // MARK: - PRIVATE
 
-    private func moveToSuitableLocation(_ cardView: CardView, toLocation: Location?, shouldTurnOverFaceTo faceState: FaceState) {
+    private func move(_ cardView: CardView, to toLocation: Location, with faceState: FaceState, animated: Bool) {
         guard let cardViewModel = cardView.viewModel else { return }
         cardViewModel.turnOver(to: faceState)
+        cardView.bringToFront()
 
-        // 탭한 뷰의 적정 위치 찾은 후
-        if let suitableLocation =
-            (toLocation == nil) ? gameViewModel.suitableLocation(for: cardViewModel) : toLocation {
-            guard gameViewModel.canMove(cardViewModel, to: suitableLocation) else { return }
-            cardView.bringToFront()
-            let cardViewsBelow = getCardViewsBelowIfNeeded(below: cardView, toLocation: suitableLocation)
-            // 뷰 업데이트
-            let movableCardView = MovableCardView(cardView: cardView,
-                                                  cardViewsBelow: cardViewsBelow,
-                                                  endLocation: suitableLocation)
-            movableCardView.delegate = self
-            gameView.move(movableCardView)
-        }
-    }
+        // tableau인 경우, 아래 붙어있는 카드들이 있으면 가져옴
+        let cardViewsBelow = gameView.getCardViewsBelowIfNeeded(below: cardView) //, toLocation: toLocation)
 
-    private func getCardViewsBelowIfNeeded(below tappedCardView: CardView, toLocation: Location) -> [CardView]? {
-        guard let fromLocation = tappedCardView.viewModel?.location.value else { return nil }
-        var cardViewsBelow: [CardView]?
-        if case let Location.tableau(index) = fromLocation {
-            guard case Location.tableau = toLocation else { return nil }
-            let tableauView = gameView.tableauViewContainer.at(index)
-            cardViewsBelow = tableauView.below(cardView: tappedCardView)
-        }
-        return cardViewsBelow
+        // 뷰 업데이트
+        let animatableCardView = AnimatableCardView(cardView: cardView,
+                                              cardViewsBelow: cardViewsBelow,
+                                              endLocation: toLocation)
+        animatableCardView.delegate = self
+        animatableCardView.viewDelegate = self
+        gameView.addSubview(animatableCardView)
+        gameView.move(animatableCardView)
     }
 
 }
@@ -96,6 +129,51 @@ extension GameViewController: UpdateModelDelegate {
 
     func update(cardViewModel: CardViewModel, to endLocation: Location) {
         cardViewModel.location.value = endLocation
+    }
+
+}
+
+extension GameViewController: UpdateViewDelegate {
+    func updateSuperview(of cardView: CardView, and cardViewsBelow: [CardView]?, to endLocation: Location?) {
+        guard let endLocation = endLocation else { return }
+        // 카드뷰가 속한 상위뷰 업데이트 (실제로는 gameView의 subview 임)
+        var endView: CanLayCards
+        switch endLocation {
+        case .spare: endView = gameView.spareView
+        case .waste: endView = gameView.wasteView
+        case .foundation(let index): endView = gameView.foundationViewContainer.at(index)
+        case .tableau(let index): endView = gameView.tableauViewContainer.at(index)
+        }
+        cardView.move(toView: endView)
+        cardViewsBelow?.forEach {
+            $0.move(toView: endView)
+        }
+    }
+
+    func updateModel(of cardView: CardView, and cardViewsBelow: [CardView]?, to endLocation: Location?) {
+        guard let endLocation = endLocation else { return }
+        // 모델 업데이트
+        guard let fromLocation = cardView.viewModel?.location.value else { return }
+        let prevEndLocation = endLocation
+        switch endLocation {
+        case .spare: refreshWaste()
+        default:
+            // 모델변경은 tableau인 경우 아래 카드까지 함께 처리하므로 클릭한 카드만 처리해주면 됨
+            move(cardViewModel: cardView.viewModel!, from: fromLocation, to: endLocation)
+        }
+        // 모델 업데이트 후, 카드 뷰모델의 Location 데이터 업데이트
+        update(cardViewModel: cardView.viewModel!, to: prevEndLocation)
+        cardViewsBelow?.forEach {
+            update(cardViewModel: $0.viewModel!, to: prevEndLocation)
+        }
+    }
+}
+
+extension GameViewController: GameResultCheckingDelegate {
+    func checkWhetherGameDone() {
+        if gameViewModel.isGameDone() {
+            print("done")
+        }
     }
 
 }
