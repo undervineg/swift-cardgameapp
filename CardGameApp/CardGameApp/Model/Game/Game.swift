@@ -41,14 +41,32 @@ class Game {
         spare.push(waste.cards.collection)
     }
 
-    func suitableLocation(_ card: Card) -> Location? {
+    func suitableLocation(for card: Card) -> Location? {
         if let suitableLocationInFoundation = foundations.searchSuitableLocation(for: card) {
-            return suitableLocationInFoundation
+            // card가 tableau의 bottom 카드가 아니면, break 후 tableau 에서 적정 목적지를 찾음
+            switch tableaus.containsAt(card) {
+            case .some(let value):
+                if !value.isBottom(card) {
+                    break       // tableau에서 다시 찾음
+                } else {
+                    fallthrough // foundation 위치 반환
+                }
+            case .none:
+                return suitableLocationInFoundation
+            }
         }
         if let suitableLocationInTableau = tableaus.searchSuitableLocation(for: card) {
             return suitableLocationInTableau
         }
         return nil
+    }
+
+    func canMove(_ card: Card, to toLocation: Location) -> Bool {
+        switch toLocation {
+        case .foundation(let index) where foundations.canPush(card, to: index): return true
+        case .tableau(let index) where tableaus.canPush(card, to: index): return true
+        default: return false
+        }
     }
 
     /**
@@ -83,5 +101,9 @@ class Game {
             tableaus.push(movingCards, to: index)
         default: break
         }
+    }
+
+    func isGameDone() -> Bool {
+        return foundations.isCompleted()
     }
 }
