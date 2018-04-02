@@ -33,35 +33,39 @@ extension CardStack: CardGameStack {
     }
 
     var count: Int {
-        return self.cards.collection.count
+        return cards.collection.count
     }
 
     var isEmpty: Bool {
-        return self.cards.collection.isEmpty
+        return cards.collection.isEmpty
     }
 
     func push(card: Card) {
-        self.cards.collection.append(card)
+        cards.collection.append(card)
     }
 
     func pop() -> Card? {
-        return self.cards.collection.popLast()
+        return cards.collection.popLast()
     }
 
     func peek() -> Card? {
-        return self.cards.collection.last
+        return cards.collection.last
     }
 
     func shuffle() {
-        guard let shuffledCards = self.cards.collection.shuffle() else { return }
-        self.cards = ObservableCollection(shuffledCards)
+        guard let shuffledCards = cards.collection.shuffle() else { return }
+        cards = ObservableCollection(shuffledCards)
     }
 
     func reset() {
-        self.cards = ObservableCollection([])
+        cards = ObservableCollection([])
     }
 
     var endIndex: Int {
-        return self.cards.collection.endIndex
+        return cards.collection.endIndex
+    }
+
+    func contains(_ element: Card) -> Bool {
+        return cards.collection.contains(element)
     }
 }

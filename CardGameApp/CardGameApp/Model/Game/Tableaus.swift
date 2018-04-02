@@ -50,4 +50,11 @@ class Tableaus: Sequence {
     func at(_ index: Int) -> Tableau {
         return stacks[index]
     }
+
+    func containsAt(_ card: Card) -> Tableau? {
+        for stack in stacks where stack.contains(card) {
+            return stack
+        }
+        return nil
+    }
 }
