@@ -16,8 +16,10 @@ class CardView: UIImageView {
         self.init(frame: frame)
         self.viewModel = viewModel
         self.image = viewModel.onCurrentFace()
+        self.isUserInteractionEnabled = true
         registerTapGesture(tapCount: 1)
         registerTapGesture(tapCount: 2)
+        registerPanGesture()
         viewModel.status.bind { [unowned self] _ in
             self.image = viewModel.onCurrentFace()
         }
@@ -80,14 +82,14 @@ extension CardView: CanFindGameView {
         let selector = (tapCount == 1) ? #selector(handleSingleTap(sender:)) : #selector(handleDoubleTap(sender:))
         let recognizer = UITapGestureRecognizer(target: self, action: selector)
         recognizer.numberOfTapsRequired = tapCount
-        self.isUserInteractionEnabled = true
-        self.addGestureRecognizer(recognizer)
+        addGestureRecognizer(recognizer)
     }
 
     @objc func handleSingleTap(sender: UITapGestureRecognizer) {
-        guard let currLocation = self.viewModel?.location.value, case Location.spare = currLocation else { return }
         handleCertainView(from: self) { gameView in
-            gameView.delegate?.onSpareViewTapped(tappedView: self)
+            if let currLocation = self.viewModel?.location.value, case Location.spare = currLocation {
+                gameView.delegate?.onSpareViewTapped(tappedView: self)
+            }
         }
     }
 
@@ -98,4 +100,21 @@ extension CardView: CanFindGameView {
         }
     }
 
+    func registerPanGesture() {
+        let recognizer = UIPanGestureRecognizer(target: self, action: #selector(handleDrag(sender:)))
+        recognizer.maximumNumberOfTouches = 1
+        addGestureRecognizer(recognizer)
+    }
+
+    @objc func handleDrag(sender: UIPanGestureRecognizer) {
+        handleCertainView(from: self) { gameView in
+            switch sender.state {
+            case .began: gameView.delegate?.onCardViewDragBegan(gesture: sender)
+            case .changed: gameView.delegate?.onCardViewDragChanged(gesture: sender)
+            case .ended: gameView.delegate?.onCardViewDragEnded(gesture: sender)
+            case .cancelled: gameView.delegate?.onCardViewDragCancelled(gesture: sender)
+            default: break
+            }
+        }
+    }
 }
