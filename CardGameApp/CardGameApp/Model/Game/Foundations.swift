@@ -43,4 +43,17 @@ class Foundations: Sequence {
     func canPush(_ card: Card, to index: Int) -> Bool {
         return stacks[index].canPush(card)
     }
+
+    func isCompleted() -> Bool {
+        return stacks.map { $0.isCompleted() }.isAllEqual()
+    }
+}
+
+extension Array where Element: Equatable {
+    func isAllEqual() -> Bool {
+        if let firstElem = first {
+            return dropFirst().contains { $0 != firstElem }
+        }
+        return true
+    }
 }
