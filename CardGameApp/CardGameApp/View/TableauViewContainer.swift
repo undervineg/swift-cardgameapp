@@ -8,9 +8,10 @@
 
 import UIKit
 
-class TableauViewContainer: UIView {
+class TableauViewContainer: UIView, Sequence {
     private var tableauViews: [TableauView] = []
     private var config: ViewConfig
+    let start: Int = 0
 
     convenience init(frame: CGRect, config: ViewConfig) {
         self.init(frame: frame)
@@ -26,6 +27,10 @@ class TableauViewContainer: UIView {
     required init?(coder aDecoder: NSCoder) {
         config = ViewConfig(on: UIView())
         super.init(coder: aDecoder)
+    }
+
+    func makeIterator() -> ClassIteratorOf<TableauView> {
+        return ClassIteratorOf(self.tableauViews)
     }
 
     private func configureTableauViews() {

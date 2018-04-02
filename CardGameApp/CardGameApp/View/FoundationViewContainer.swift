@@ -8,9 +8,10 @@
 
 import UIKit
 
-class FoundationViewContainer: UIView {
+class FoundationViewContainer: UIView, Sequence {
     private var foundationViews: [FoundationView] = []
     private var config: ViewConfig
+    let start: Int = 0
 
     convenience init(frame: CGRect, config: ViewConfig) {
         self.init(frame: frame)
@@ -26,6 +27,10 @@ class FoundationViewContainer: UIView {
     required init?(coder aDecoder: NSCoder) {
         config = ViewConfig(on: UIView())
         super.init(coder: aDecoder)
+    }
+
+    func makeIterator() -> ClassIteratorOf<FoundationView> {
+        return ClassIteratorOf(self.foundationViews)
     }
 
     func removeAllCards() {
