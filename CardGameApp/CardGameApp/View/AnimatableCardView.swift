@@ -8,15 +8,28 @@
 
 import UIKit
 
-class MovableCardView: UIView, CanFindGameView {
+class AnimatableCardView: UIView, Movable, CanFindGameView {
+    weak var viewDelegate: UpdateViewDelegate?
     weak var delegate: UpdateModelDelegate?
-    private var cardView: CardView
-    private var cardViewsBelow: [CardView]?
+    let cardView: CardView
+    let fromLocation: Location
+    private(set) var cardViewsBelow: [CardView]?
+    private(set) var endLocation: Location?
     private var startPosition: CGPoint = .zero
-    private var fromLocation: Location
-    private(set) var endLocation: Location
 
-    init(cardView: CardView, cardViewsBelow: [CardView]?, endLocation: Location) {
+    convenience init() {
+        self.init(cardView: CardView(frame: .zero), cardViewsBelow: nil, endLocation: nil)
+    }
+    
+    convenience init(cardView: CardView, cardViewsBelow: [CardView]?) {
+        self.init(cardView: cardView, cardViewsBelow: cardViewsBelow, endLocation: nil)
+    }
+
+    convenience init(cardView: CardView, endLocation: Location?) {
+        self.init(cardView: cardView, cardViewsBelow: nil, endLocation: endLocation)
+    }
+
+    init(cardView: CardView, cardViewsBelow: [CardView]?, endLocation: Location?) {
         self.cardView = cardView
         self.cardViewsBelow = cardViewsBelow
         self.fromLocation = cardView.viewModel!.location.value
@@ -37,7 +50,9 @@ class MovableCardView: UIView, CanFindGameView {
         self.endLocation = .spare
         super.init(coder: aDecoder)
     }
+}
 
+extension AnimatableCardView {
     override func layoutSubviews() {
         self.cardView.frame.origin = self.frame.origin
         self.cardViewsBelow?.enumerated().forEach {
@@ -57,59 +72,20 @@ class MovableCardView: UIView, CanFindGameView {
         super.layoutSubviews()
     }
 
-    func animateToMove(to endPosition: CGPoint?) {
-        guard let endPosition = endPosition else { return }
-
+    func animateToMove(to endPosition: CGPoint) {
         let translateTransform = self.transform.translatedBy(x: endPosition.x-startPosition.x,
                                                              y: endPosition.y-startPosition.y)
-
         UIView.transition(with: self, duration: 0.3, options: .curveEaseOut, animations: {
             self.bringToFront()
             self.transform = translateTransform
             self.layoutIfNeeded()
         }, completion: { _ in
-            self.updateSuperview()
-            self.updateModel()
+            self.viewDelegate?.updateSuperview(of: self.cardView, and: self.cardViewsBelow, to: self.endLocation)
+            self.viewDelegate?.updateModel(of: self.cardView, and: self.cardViewsBelow, to: self.endLocation)
         })
-
     }
 
-    // MARK: - PRIVATE
-
-    func bringToFront() {
+    private func bringToFront() {
         superview?.bringSubview(toFront: self)
-    }
-
-    private func updateSuperview() {
-        // 카드뷰가 속한 상위뷰 업데이트 (실제로는 gameView의 subview 임)
-        self.handleCertainView(from: self.cardView, execute: { gameView in
-            var endView: CanLayCards
-            switch self.endLocation {
-            case .spare: endView = gameView.spareView
-            case .waste: endView = gameView.wasteView
-            case .foundation(let index): endView = gameView.foundationViewContainer.at(index)
-            case .tableau(let index): endView = gameView.tableauViewContainer.at(index)
-            }
-            self.cardView.move(toView: endView)
-            self.cardViewsBelow?.forEach {
-                $0.move(toView: endView)
-            }
-        })
-    }
-
-    private func updateModel() {
-        // 모델 업데이트
-        let prevEndLocation = self.endLocation
-        switch self.endLocation {
-        case .spare: self.delegate?.refreshWaste()
-        default:
-            self.delegate?.move(cardViewModel: self.cardView.viewModel!,
-                                     from: self.fromLocation, to: self.endLocation)
-        }
-        // 모델 업데이트 후, 카드 뷰모델의 Location 데이터 업데이트
-        self.delegate?.update(cardViewModel: self.cardView.viewModel!, to: prevEndLocation)
-        self.cardViewsBelow?.forEach { [unowned self] in
-            self.delegate?.update(cardViewModel: $0.viewModel!, to: prevEndLocation)
-        }
     }
 }
