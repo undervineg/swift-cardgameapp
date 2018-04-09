@@ -19,7 +19,7 @@ class CardViewModel {
         var isUserInteractive: Bool
         switch location.value {
         case .waste: isUserInteractive = true
-        case .spare: isUserInteractive = false
+        case .spare: isUserInteractive = true
         case .foundation: isUserInteractive = false
         case .tableau: isUserInteractive = (status.value == .up) ? true : false
         }
@@ -47,7 +47,7 @@ class CardViewModel {
         }
     }
 
-    func move(to location: Location) {
+    func updateLocation(to location: Location) {
         self.location.value = location
     }
 }
