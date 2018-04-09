@@ -12,6 +12,4 @@ protocol UpdateModelDelegate: class {
     func refreshWaste()
 
     func move(cardViewModel: CardViewModel, from startLocation: Location, to endLocation: Location)
-
-    func update(cardViewModel: CardViewModel, to endLocation: Location)
 }
