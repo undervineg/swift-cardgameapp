@@ -45,15 +45,7 @@ class Foundations: Sequence {
     }
 
     func isCompleted() -> Bool {
-        return stacks.map { $0.isCompleted() }.isAllEqual()
-    }
-}
-
-extension Array where Element: Equatable {
-    func isAllEqual() -> Bool {
-        if let firstElem = first {
-            return dropFirst().contains { $0 != firstElem }
-        }
-        return true
+        let completed = stacks.filter { $0.isCompleted() }
+        return stacks.count == completed.count
     }
 }
