@@ -16,13 +16,17 @@ class CardView: UIImageView {
         self.init(frame: frame)
         self.viewModel = viewModel
         self.image = viewModel.onCurrentFace()
-        self.isUserInteractionEnabled = true
+        self.isUserInteractionEnabled = viewModel.isUserInteractive
+        viewModel.location.bind { [unowned self] _ in
+            self.isUserInteractionEnabled = viewModel.isUserInteractive
+        }
+        viewModel.status.bind { [unowned self] _ in
+            self.isUserInteractionEnabled = viewModel.isUserInteractive
+            self.image = viewModel.onCurrentFace()
+        }
         registerTapGesture(tapCount: 1)
         registerTapGesture(tapCount: 2)
         registerPanGesture()
-        viewModel.status.bind { [unowned self] _ in
-            self.image = viewModel.onCurrentFace()
-        }
     }
 
     override init(frame: CGRect) {
@@ -43,7 +47,7 @@ class CardView: UIImageView {
         superview?.sendSubview(toBack: self)
     }
 
-    func move(toView: CanLayCards) {
+    func move(toView: CanLayCards?) {
         guard let fromLocation = viewModel?.location.value,
             let gameView = self.superview as? GameView else { return }
         var fromView: CanLayCards?
@@ -54,7 +58,7 @@ class CardView: UIImageView {
         case .tableau(let index): fromView = gameView.tableauViewContainer.at(index)
         }
         fromView?.removeLastCard()
-        toView.lay(card: self)
+        toView?.lay(card: self)
     }
 
 }
