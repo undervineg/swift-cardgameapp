@@ -38,7 +38,9 @@ class Game {
 
     // waste -> spare
     func refreshWaste() {
-        spare.push(waste.cards.collection)
+        for card in waste.cards.collection.reversed() {
+            move(cardsFrom: card, from: .waste, to: .spare)
+        }
     }
 
     func suitableLocation(for card: Card) -> Location? {
@@ -93,7 +95,7 @@ class Game {
         }
 
         switch toLocation {
-        case .spare: break
+        case .spare: spare.push(card: card)
         case .waste: waste.push(card: card)
         case .foundation(let index) where foundations.canPush(card, to: index):
             foundations.push(card, to: index)
