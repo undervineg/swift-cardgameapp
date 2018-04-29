@@ -11,12 +11,7 @@ import UIKit
 class FoundationView: UIView, CanLayCards, CanFindGameView {
     private var index: Int
     private let emptyView: EmptyView
-    weak var checkDelegate: GameResultCheckingDelegate?
-    private var laidCards: [CardView] = [] {
-        didSet {
-            checkDelegate?.checkWhetherGameDone()
-        }
-    }
+    private var laidCards: [CardView] = []
 
     convenience init(frame: CGRect, index: Int) {
         self.init(frame: frame)

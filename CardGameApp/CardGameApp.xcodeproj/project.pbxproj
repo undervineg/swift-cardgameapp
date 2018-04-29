@@ -39,7 +39,7 @@
 		EE3E7D2120634F0600232E70 /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3E7D2020634F0600232E70 /* EmptyView.swift */; };
 		EE5831E12071C7B700C28DAC /* Movable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5831E02071C7B700C28DAC /* Movable.swift */; };
 		EE5831E32071CB0C00C28DAC /* UpdateViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5831E22071CB0C00C28DAC /* UpdateViewDelegate.swift */; };
-		EE5831E52071CB3000C28DAC /* GameResultCheckingDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5831E42071CB3000C28DAC /* GameResultCheckingDelegate.swift */; };
+		EE5831E52071CB3000C28DAC /* GameCompleteDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5831E42071CB3000C28DAC /* GameCompleteDelegate.swift */; };
 		EE9AA9DD203200F200FBF2F1 /* BorderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9AA9DC203200F200FBF2F1 /* BorderState.swift */; };
 		EE9AA9E72032183D00FBF2F1 /* CardViewActionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9AA9E62032183D00FBF2F1 /* CardViewActionDelegate.swift */; };
 		EEAA97C12063E91600A2C441 /* Foundations.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEAA97C02063E91600A2C441 /* Foundations.swift */; };
@@ -104,7 +104,7 @@
 		EE3E7D2020634F0600232E70 /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
 		EE5831E02071C7B700C28DAC /* Movable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movable.swift; sourceTree = "<group>"; };
 		EE5831E22071CB0C00C28DAC /* UpdateViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateViewDelegate.swift; sourceTree = "<group>"; };
-		EE5831E42071CB3000C28DAC /* GameResultCheckingDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResultCheckingDelegate.swift; sourceTree = "<group>"; };
+		EE5831E42071CB3000C28DAC /* GameCompleteDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCompleteDelegate.swift; sourceTree = "<group>"; };
 		EE9AA9DC203200F200FBF2F1 /* BorderState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderState.swift; sourceTree = "<group>"; };
 		EE9AA9E62032183D00FBF2F1 /* CardViewActionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewActionDelegate.swift; sourceTree = "<group>"; };
 		EEAA97C02063E91600A2C441 /* Foundations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Foundations.swift; sourceTree = "<group>"; };
@@ -323,7 +323,7 @@
 			children = (
 				EEB404622066A7E000297E8C /* UpdateModelDelegate.swift */,
 				EE5831E22071CB0C00C28DAC /* UpdateViewDelegate.swift */,
-				EE5831E42071CB3000C28DAC /* GameResultCheckingDelegate.swift */,
+				EE5831E42071CB3000C28DAC /* GameCompleteDelegate.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -530,7 +530,7 @@
 				EEFA5885206E476300801DDC /* DraggableCard.swift in Sources */,
 				EEB70FF020335282004F4362 /* AnimatableCardView.swift in Sources */,
 				EEB404552064D06F00297E8C /* RefreshActionDelegate.swift in Sources */,
-				EE5831E52071CB3000C28DAC /* GameResultCheckingDelegate.swift in Sources */,
+				EE5831E52071CB3000C28DAC /* GameCompleteDelegate.swift in Sources */,
 				EEBF592E202191CC00093436 /* CardStack.swift in Sources */,
 				EE3E7D032063495600232E70 /* EnumCollectionProtocol.swift in Sources */,
 				EEAA97C32063EE6E00A2C441 /* Tableaus.swift in Sources */,

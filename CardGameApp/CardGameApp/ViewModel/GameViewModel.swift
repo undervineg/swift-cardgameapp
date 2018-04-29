@@ -8,8 +8,8 @@
 
 import Foundation
 
-class GameViewModel {
-
+class GameViewModel: GameCompleteDelegate {
+    weak var delegate: GameCompleteDelegate?
     private var game: Game
     private(set) var spareViewModel: CardStackPresentable
     private(set) var wasteViewModel: CardStackPresentable
@@ -22,6 +22,7 @@ class GameViewModel {
         wasteViewModel = WasteViewModel()
         foundationViewModels = FoundationViewModels()
         tableauViewModels = TableauViewModels()
+        foundationViewModels.delegate = self
     }
 
     // MARK: - Update Models
@@ -80,6 +81,10 @@ class GameViewModel {
             self.game.waste.isAdded ? self.wasteViewModel.append($0) : self.wasteViewModel.remove()
         }
         tableauViewModels.bind(with: game.tableaus)
+    }
+
+    func showCompleteMessage() {
+        delegate?.showCompleteMessage()
     }
 
 }

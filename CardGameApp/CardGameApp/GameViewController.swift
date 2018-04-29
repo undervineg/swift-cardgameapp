@@ -14,11 +14,14 @@ class GameViewController: UIViewController {
         didSet {
             gameView.delegate = self
             gameView.refreshDelegate = self
-            gameView.checkDelegate = self
             view.addSubview(gameView)
         }
     }
-    private var gameViewModel: GameViewModel!
+    private var gameViewModel: GameViewModel! {
+        didSet {
+            gameViewModel.delegate = self
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +36,13 @@ class GameViewController: UIViewController {
 }
 
 extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
+    func canMove(_ cardViewModel: CardViewModel?, to location: Location?) -> Bool {
+        if let cardViewModel = cardViewModel, let location = location {
+            return gameViewModel.canMove(cardViewModel, to: location)
+        }
+        return false
+    }
+
     func onCardViewDragBegan(gesture: UIPanGestureRecognizer) {
         guard let tappedView = gesture.view as? CardView else { return }
         self.draggableCard = DraggableCard(cardView: tappedView)
@@ -52,9 +62,7 @@ extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
 
     func onCardViewDragEnded(gesture: UIPanGestureRecognizer) {
         guard let tappedView = gesture.view as? CardView,
-            let cardViewModel = tappedView.viewModel,
-            let dropLocation = gameView.dropLocation(of: tappedView),
-            gameViewModel.canMove(cardViewModel, to: dropLocation) else {
+            let dropLocation = gameView.dropLocation(of: tappedView) else {
                 onCardViewDragCancelled(gesture: gesture)
                 return
         }
@@ -68,13 +76,6 @@ extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
 
     func onCardViewDragCancelled(gesture: UIPanGestureRecognizer) {
         draggableCard?.reset()
-    }
-
-    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
-        if motion == .motionShake {
-            gameViewModel.initialize()
-            gameView.newGame(with: gameViewModel)
-        }
     }
 
     func onCardViewDoubleTapped(tappedView: CardView) {
@@ -92,6 +93,13 @@ extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
     func onRefreshButtonTapped() {
         for card in gameView.wasteView.reversed() {
             move(card, to: .spare, with: .down, animated: true)
+        }
+    }
+
+    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+        if motion == .motionShake {
+            gameViewModel.initialize()
+            gameView.newGame(with: gameViewModel)
         }
     }
 
@@ -127,17 +135,13 @@ extension GameViewController: UpdateModelDelegate {
         gameViewModel.move(cardViewModel: cardViewModel, from: fromLocation, to: endLocation)
     }
 
-    func update(cardViewModel: CardViewModel, to endLocation: Location) {
-        cardViewModel.location.value = endLocation
-    }
-
 }
 
 extension GameViewController: UpdateViewDelegate {
     func updateSuperview(of cardView: CardView, and cardViewsBelow: [CardView]?, to endLocation: Location?) {
         guard let endLocation = endLocation else { return }
         // 카드뷰가 속한 상위뷰 업데이트 (실제로는 gameView의 subview 임)
-        var endView: CanLayCards
+        var endView: CanLayCards?
         switch endLocation {
         case .spare: endView = gameView.spareView
         case .waste: endView = gameView.wasteView
@@ -162,18 +166,16 @@ extension GameViewController: UpdateViewDelegate {
             move(cardViewModel: cardView.viewModel!, from: fromLocation, to: endLocation)
         }
         // 모델 업데이트 후, 카드 뷰모델의 Location 데이터 업데이트
-        update(cardViewModel: cardView.viewModel!, to: prevEndLocation)
+        cardView.viewModel?.updateLocation(to: prevEndLocation)
         cardViewsBelow?.forEach {
-            update(cardViewModel: $0.viewModel!, to: prevEndLocation)
+            $0.viewModel?.updateLocation(to: prevEndLocation)
         }
     }
 }
 
-extension GameViewController: GameResultCheckingDelegate {
-    func checkWhetherGameDone() {
-        if gameViewModel.isGameDone() {
-            print("done")
-        }
+extension GameViewController: GameCompleteDelegate {
+    func showCompleteMessage() {
+        print("done")
     }
 
 }

@@ -11,16 +11,9 @@ import UIKit
 class GameView: UIView {
     weak var delegate: CardViewActionDelegate?
     weak var refreshDelegate: RefreshActionDelegate?
-    weak var checkDelegate: GameResultCheckingDelegate?
     private var game: GameViewModel!
     private var config: ViewConfig!
-    private(set) var foundationViewContainer = FoundationViewContainer(frame: .zero) {
-        didSet {
-            (0..<config.foundationCount).forEach {
-                foundationViewContainer.at($0).checkDelegate = self
-            }
-        }
-    }
+    private(set) var foundationViewContainer = FoundationViewContainer(frame: .zero)
     private(set) var wasteView = WasteView(frame: .zero)
     private(set) var spareView = SpareView(frame: .zero) {
         didSet {
@@ -64,14 +57,17 @@ class GameView: UIView {
     }
 
     func dropLocation(of cardView: CardView) -> Location? {
+        guard let delegate = delegate else { return nil }
         // spare, waste에는 놓을 수 없다
         for (index, foundation) in foundationViewContainer.enumerated() {
-            if cardView.frame.intersects(foundation.frame) {
+            if cardView.frame.intersects(foundation.frame)
+                && delegate.canMove(cardView.viewModel, to: Location.foundation(index)) {
                 return Location.foundation(index)
             }
         }
         for (index, tableau) in tableauViewContainer.enumerated() {
-            if cardView.frame.intersects(tableau.nextCardRect()) {
+            if cardView.frame.intersects(tableau.nextCardRect())
+                && delegate.canMove(cardView.viewModel, to: Location.tableau(index)) {
                 return Location.tableau(index)
             }
         }
@@ -151,14 +147,10 @@ class GameView: UIView {
 
 }
 
-extension GameView: RefreshActionDelegate, GameResultCheckingDelegate {
+extension GameView: RefreshActionDelegate {
     // SpareView에서 올라온 델리게이트 액션을 받아 GameViewController에 넘김
     func onRefreshButtonTapped() {
         refreshDelegate?.onRefreshButtonTapped()
     }
-
-    func checkWhetherGameDone() {
-        checkDelegate?.checkWhetherGameDone()
-    }
-
+    
 }

@@ -8,6 +8,6 @@
 
 import Foundation
 
-protocol GameResultCheckingDelegate: class {
-    func checkWhetherGameDone()
+protocol GameCompleteDelegate: class {
+    func showCompleteMessage()
 }

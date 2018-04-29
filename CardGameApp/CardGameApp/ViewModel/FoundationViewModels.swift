@@ -9,6 +9,7 @@
 import Foundation
 
 class FoundationViewModels: Sequence {
+    weak var delegate: GameCompleteDelegate?
     let start: Int = 0
     private var foundationViewModels: [CardStackPresentable]
 
@@ -28,8 +29,9 @@ class FoundationViewModels: Sequence {
 
     func bind(with foundations: Foundations) {
         for (model, viewModel) in zip(foundations, foundationViewModels) {
-            model.cards.bind {
+            model.cards.bind { [unowned self] in
                 model.isAdded ? viewModel.append($0) : viewModel.remove()
+                model.isCompleted() ? self.delegate?.showCompleteMessage() : nil
             }
         }
     }

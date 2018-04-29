@@ -20,4 +20,6 @@ protocol CardViewActionDelegate: class {
     func onCardViewDragEnded(gesture: UIPanGestureRecognizer)
 
     func onCardViewDragCancelled(gesture: UIPanGestureRecognizer)
+
+    func canMove(_ cardViewModel: CardViewModel?, to location: Location?) -> Bool
 }
