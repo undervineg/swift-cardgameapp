@@ -40,11 +40,11 @@ class CardView: UIImageView {
     }
 
     func bringToFront() {
-        superview?.bringSubview(toFront: self)
+        superview?.bringSubviewToFront(self)
     }
 
     func sendBack() {
-        superview?.sendSubview(toBack: self)
+        superview?.sendSubviewToBack(self)
     }
 
     func move(toView: CanLayCards?) {

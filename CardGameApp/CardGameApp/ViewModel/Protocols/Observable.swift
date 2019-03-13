@@ -23,12 +23,18 @@ class Observable<ObservingType> {
     }
 
     func bind(_ listener: Listener?) {
+        guard let listener = listener else {
+            return
+        }
         self.listener = listener
     }
 
     func bindAndFire(_ listener: Listener?) {
+        guard let listener = listener else {
+            return
+        }
         self.listener = listener
-        listener?(self.value)
+        listener(self.value)
     }
 }
 
@@ -61,11 +67,17 @@ class ObservableCollection<ObservingType: Sequence> {
     }
 
     func bind(_ listener: Listener?) {
+        guard let listener = listener else {
+            return
+        }
         self.listener = listener
     }
 
     func bindAndFire(_ listener: Listener?) {
+        guard let listener = listener else {
+            return
+        }
         self.listener = listener
-        listener?(element)
+        listener(element)
     }
 }

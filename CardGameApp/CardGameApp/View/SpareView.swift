@@ -62,7 +62,7 @@ class SpareView: UIView, CanLayCards {
     }
 
     private func addRefreshButton() {
-        let refreshImageView = UIImageView(image: UIImage(imageLiteralResourceName: config.refreshFile))
+        let refreshImageView = UIImageView(image: UIImage(named: config.refreshFile)!)
         addSubview(refreshImageView)
 
         refreshImageView.translatesAutoresizingMaskIntoConstraints = false

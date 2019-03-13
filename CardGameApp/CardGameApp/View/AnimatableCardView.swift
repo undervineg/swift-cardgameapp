@@ -86,6 +86,6 @@ extension AnimatableCardView {
     }
 
     private func bringToFront() {
-        superview?.bringSubview(toFront: self)
+        superview?.bringSubviewToFront(self)
     }
 }

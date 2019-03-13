@@ -96,7 +96,7 @@ extension GameViewController: CardViewActionDelegate, RefreshActionDelegate {
         }
     }
 
-    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         if motion == .motionShake {
             gameViewModel.initialize()
             gameView.newGame(with: gameViewModel)

@@ -68,8 +68,8 @@ extension Deck: CardGameStack {
     // 정렬된 카드 52장 새로 생성.
     func reset() {
         let aStackOfCards = CardStack()
-        let shapes = Shape.allValues
-        let numbers = Number.allValues
+        let shapes = Shape.allCases
+        let numbers = Number.allCases
         // 모든 모양, 숫자의 조합으로 카드 52장 생성.
         for shape in shapes {
             for number in numbers {

@@ -42,8 +42,8 @@ class CardViewModel {
 
     func onCurrentFace() -> UIImage {
         switch status.value {
-        case .up: return UIImage(imageLiteralResourceName: card.frontImageFileName)
-        case .down: return UIImage(imageLiteralResourceName: card.backImageFileName)
+        case .up: return UIImage(named: card.frontImageFileName)!
+        case .down: return UIImage(named: card.backImageFileName)!
         }
     }
 
